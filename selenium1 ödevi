@@ -17,24 +17,33 @@ class SauceDemoTest:
         username_input.send_keys(username)
         password_input.send_keys(password)
         login_button.click()
+       
 
     def verify_alert_message(self, expected_message): #Bu metod, belirtilen beklenen uyarı mesajının görüntülendiğini doğrular.
         alert_message = self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@id='login_button_container']/div/form/div[3]/h3"))).text
         assert alert_message == expected_message, f"Expected alert message: {expected_message}, but got: {alert_message}"
+        print("Alert message verified:", alert_message)
 
     def verify_redirect_url(self, expected_url): #Bu metod, belirtilen beklenen URL'ye yönlendirildiğini doğrular.
         actual_url = self.wait.until(EC.url_to_be(expected_url))
         assert actual_url, f"Expected to be redirected to {expected_url}, but the actual URL is {self.driver.current_url}"
+        print("Redirect URL verified:", self.driver.current_url)
 
     def verify_product_count(self, expected_count): # Bu metod, belirtilen ürün sayısının görüntülendiğini doğrular.
         product_list = self.wait.until(EC.visibility_of_all_elements_located((By.CLASS_NAME, "inventory_item")))
         assert len(product_list) == expected_count, f"Expected {expected_count} products, but found {len(product_list)}"
+        print("Product count verified:", len(product_list))
 
     def run_tests(self): #Bu metod, tüm test senaryolarını çalıştırır. Her bir test senaryosu, oturum açma metodunu çağırarak belirli bir senaryoyu simüle eder ve ardından sonucu doğrular.
+        print("Testing empty username...")
         self.test_empty_username()
+        print("Testing empty password...")
         self.test_empty_password()
+        print("Testing locked out user...")
         self.test_locked_out_user()
+        print("Testing successful login...")
         self.test_successful_login()
+        print("All tests completed.")
 # Her bir test senaryosu için ayrı bir metod tanımlarız. Her metod, belirli bir test senaryosunu simüle eder ve ardından sonucu doğrular.
     def test_empty_username(self):
         self.login("", "secret_sauce")
