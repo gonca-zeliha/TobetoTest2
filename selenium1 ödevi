@@ -1,0 +1,62 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By #selenium'un web elementlerini bulmak için kullanılan By modülünü içe aktarırız.
+from selenium.webdriver.support.ui import WebDriverWait #Selenium'un bekleme işlevselliğini kullanabilmek için WebDriverWait modülünü içe aktarırız. Bu, sayfanın yüklenmesini beklemek için kullanılır.
+from selenium.webdriver.support import expected_conditions as EC #Selenium'un beklenen koşullarını tanımlamak için expected_conditions modülünü içe aktarırız. Bu, belirli bir koşulun gerçekleşip gerçekleşmediğini kontrol etmemize olanak tanır.
+
+class SauceDemoTest:
+    def __init__(self): #Sınıfın başlatıcı metodunu tanımlarız. Bu metod, sınıf bir örneği oluşturulduğunda otomatik olarak çağrılır. Bu metodda Chrome WebDriver'ını başlatırız, pencereyi maksimize ederiz ve bekleme nesnesini oluştururuz.
+        self.driver = webdriver.Chrome()
+        self.driver.maximize_window()
+        self.wait = WebDriverWait(self.driver, 10)
+
+    def login(self, username, password): #Bu metod, belirtilen kullanıcı adı ve şifreyle bir oturum açmaya izin verir. Bu, oturum açma işlemini gerçekleştirir ve ardından oturum açma durumunu doğrular.
+        self.driver.get("https://www.saucedemo.com/")
+        username_input = self.driver.find_element(By.ID, "user-name")
+        password_input = self.driver.find_element(By.ID, "password")
+        login_button = self.driver.find_element(By.ID, "login-button")
+        username_input.send_keys(username)
+        password_input.send_keys(password)
+        login_button.click()
+
+    def verify_alert_message(self, expected_message): #Bu metod, belirtilen beklenen uyarı mesajının görüntülendiğini doğrular.
+        alert_message = self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@id='login_button_container']/div/form/div[3]/h3"))).text
+        assert alert_message == expected_message, f"Expected alert message: {expected_message}, but got: {alert_message}"
+
+    def verify_redirect_url(self, expected_url): #Bu metod, belirtilen beklenen URL'ye yönlendirildiğini doğrular.
+        actual_url = self.wait.until(EC.url_to_be(expected_url))
+        assert actual_url, f"Expected to be redirected to {expected_url}, but the actual URL is {self.driver.current_url}"
+
+    def verify_product_count(self, expected_count): # Bu metod, belirtilen ürün sayısının görüntülendiğini doğrular.
+        product_list = self.wait.until(EC.visibility_of_all_elements_located((By.CLASS_NAME, "inventory_item")))
+        assert len(product_list) == expected_count, f"Expected {expected_count} products, but found {len(product_list)}"
+
+    def run_tests(self): #Bu metod, tüm test senaryolarını çalıştırır. Her bir test senaryosu, oturum açma metodunu çağırarak belirli bir senaryoyu simüle eder ve ardından sonucu doğrular.
+        self.test_empty_username()
+        self.test_empty_password()
+        self.test_locked_out_user()
+        self.test_successful_login()
+# Her bir test senaryosu için ayrı bir metod tanımlarız. Her metod, belirli bir test senaryosunu simüle eder ve ardından sonucu doğrular.
+    def test_empty_username(self):
+        self.login("", "secret_sauce")
+        self.verify_alert_message("Epic sadface: Username is required")
+
+    def test_empty_password(self):
+        self.login("standard_user", "")
+        self.verify_alert_message("Epic sadface: Password is required")
+
+    def test_locked_out_user(self):
+        self.login("locked_out_user", "secret_sauce")
+        self.verify_alert_message("Epic sadface: Sorry, this user has been locked out.")
+
+    def test_successful_login(self):
+        self.login("standard_user", "secret_sauce")
+        self.verify_redirect_url("https://www.saucedemo.com/inventory.html")
+        self.verify_product_count(6)
+
+    def close(self): #Bu metod, WebDriver'ı kapatır ve testlerin sonlandırılmasını sağlar.
+        self.driver.quit()
+
+if __name__ == "__main__": #Bu, Python'un ana program olduğunu belirtir. Bu koşul, kodun doğrudan çalıştırıldığında yürütülmesini sağlar.
+    test_instance = SauceDemoTest() #SauceDemoTest sınıfından bir örnek oluşturur.
+    test_instance.run_tests() #Oluşturulan örneğin run_tests() metodunu çağırırız. Bu, tüm test senaryolarını çalıştırır.
+    test_instance.close() #
