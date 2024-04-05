@@ -24,8 +24,10 @@ class test_Sauce:
         loginButton.click()
         erorMesaji=driver.find_element(By.XPATH,"//*[@id='login_button_container']/div/form/div[3]/h3") #eror mesajını bulduk.
         testResult = erorMesaji.text ==  "Epic sadface: Username is required" #eror msajının verilene eşitmi bakalıcak
+        mesajCarpi=driver.find_element(By.XPATH,"//*[@id='login_button_container']/div/form/div[3]/h3/button")
+        mesajCarpi.click()
         print(f"Test Sonucu:{testResult}") 
-        
+
     
     def sifrebos (self):
         driver= self.onkosul()
@@ -35,7 +37,7 @@ class test_Sauce:
         loginButton.click() 
         erorMesaji2=driver.find_element(By.XPATH,"//*[@id='login_button_container']/div/form/div[3]/h3") #eror mesajını bulduk.
         testResult2 = erorMesaji2.text ==  "Epic sadface: Password is required" #eror msajının verilene eşitmi bakalıcak
-        print(f"Test Sonucu:{testResult2}")
+        print(f"Test Sonucu2:{testResult2}")
 
     def yasakliKullanici (self):
         driver= self.onkosul()
@@ -47,11 +49,24 @@ class test_Sauce:
         loginButton.click()
         erorMesaji3=driver.find_element(By.XPATH,"//*[@id='login_button_container']/div/form/div[3]/h3")
         testResult3=erorMesaji3.text == "Epic sadface: Sorry, this user has been locked out."
-        print(f"Test Sonucu : {testResult3}")
-        
+        print(f"Test Sonucu3 : {testResult3}")
+    
+    def dogruGiris(self):
+        driver=self.onkosul()
+        kullaniciAdi =driver.find_element(By.ID,"user-name")
+        kullaniciAdi.send_keys("standard_user")
+        sifre=driver.find_element(By.ID,"password")
+        sifre.send_keys("secret_sauce")
+        loginButton=driver.find_element(By.ID,"login-button")
+        loginButton.click()
+        sleep(2)
+
+        urunListesi=driver.find_elements(By.CLASS_NAME,"inventory_item") #elemnt sayısı falza olduğu için elemnts kullandık
+        print(f"Ürün Sayısı: {len(urunListesi)}")
 
 testClass=test_Sauce() # classı değişkene atıyoruz.
 testClass.onkosul() # değişkenle fonksiyonu çalıştırıyoruz.
 testClass.bosgiris() #değişkenle bosgirişi çalıştır.
 testClass.sifrebos() #değişkenle bosgirişi çalıştır.
 testClass.yasakliKullanici()
+testClass.dogruGiris()
